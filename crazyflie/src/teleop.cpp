@@ -96,7 +96,7 @@ public:
         on_mode_switched();
 
         dt_ = 1.0f/frequency_;
-        is_low_level_flight_active_ = true;//false;
+        is_low_level_flight_active_ = false;
 
         // Create a parameter subscriber that can be used to monitor parameter changes
         param_subscriber_ = std::make_shared<rclcpp::ParameterEventHandler>(this);
@@ -190,10 +190,6 @@ private:
             q = AngleAxisf(0, Vector3f::UnitX())
                     * AngleAxisf(0, Vector3f::UnitY())
                     * AngleAxisf(state_.yaw, Vector3f::UnitZ());
-
-            // q = AngleAxisf(state_.yaw, Vector3f::UnitX())
-            //     * AngleAxisf(0, Vector3f::UnitY())
-            //     * AngleAxisf(0, Vector3f::UnitZ());
 
             fullstate_.pose.position.x = state_.x; 
             fullstate_.pose.position.y = state_.y;

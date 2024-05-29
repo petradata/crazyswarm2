@@ -16,6 +16,7 @@ from geometry_msgs.msg import Twist
 import rclpy
 from rclpy.node import Node
 import rowan
+from std_msgs.msg import String
 from std_srvs.srv import Empty
 
 
@@ -90,16 +91,18 @@ class CrazyflieServer(Node):
                 controller_name,
                 self.backend.time)
 
-        # Create services for the entire swarm and each individual crazyflie
-        self.create_service(Empty, 'all/emergency', self._emergency_callback)
-        self.create_service(Takeoff, 'all/takeoff', self._takeoff_callback)
-        self.create_service(Land, 'all/land', self._land_callback)
-        self.create_service(GoTo, 'all/go_to', self._go_to_callback)
-        self.create_service(StartTrajectory,
-                            'all/start_trajectory',
-                            self._start_trajectory_callback)
-
         for name, _ in self.cfs.items():
+            pub = self.create_publisher(
+                    String,
+                    name + '/robot_description',
+                    rclpy.qos.QoSProfile(
+                        depth=1,
+                        durability=rclpy.qos.QoSDurabilityPolicy.TRANSIENT_LOCAL))
+
+            msg = String()
+            msg.data = self._ros_parameters['robot_description'].replace('$NAME', name)
+            pub.publish(msg)
+
             self.create_service(
                 Empty,
                 name + '/emergency',
@@ -154,6 +157,18 @@ class CrazyflieServer(Node):
                 10
             )
 
+        # Create services for the entire swarm and each individual crazyflie
+        self.create_service(Takeoff, 'all/takeoff', self._takeoff_callback)
+        self.create_service(Land, 'all/land', self._land_callback)
+        self.create_service(GoTo, 'all/go_to', self._go_to_callback)
+        self.create_service(StartTrajectory,
+                            'all/start_trajectory',
+                            self._start_trajectory_callback)
+
+        # This is the last service to announce.
+        # Can be used to check if the server is fully available.
+        self.create_service(Empty, 'all/emergency', self._emergency_callback)
+
         # step as fast as possible
         max_dt = 0.0 if 'max_dt' not in self._ros_parameters['sim'] \
             else self._ros_parameters['sim']['max_dt']
@@ -198,7 +213,7 @@ class CrazyflieServer(Node):
         return tree
 
     def _emergency_callback(self, request, response, name='all'):
-        self.get_logger().info('emergency not yet implemented')
+        self.get_logger().info(f'[{name}] emergency not yet implemented')
 
         return response
 
@@ -207,9 +222,9 @@ class CrazyflieServer(Node):
         duration = float(request.duration.sec) + \
             float(request.duration.nanosec / 1e9)
         self.get_logger().info(
-            f'takeoff(height={request.height} m,'
+            f'[{name}] takeoff(height={request.height} m,'
             + f'duration={duration} s,'
-            + f'group_mask={request.group_mask}) {name}'
+            + f'group_mask={request.group_mask})'
         )
         cfs = self.cfs if name == 'all' else {name: self.cfs[name]}
         for _, cf in cfs.items():
@@ -222,7 +237,7 @@ class CrazyflieServer(Node):
         duration = float(request.duration.sec) + \
             float(request.duration.nanosec / 1e9)
         self.get_logger().info(
-            f'land(height={request.height} m,'
+            f'[{name}] land(height={request.height} m,'
             + f'duration={duration} s,'
             + f'group_mask={request.group_mask})'
         )
@@ -238,8 +253,13 @@ class CrazyflieServer(Node):
             float(request.duration.nanosec / 1e9)
 
         self.get_logger().info(
-            'go_to(position=%f,%f,%f m, yaw=%f rad, duration=%f s, relative=%d, group_mask=%d)'
+            """[%s] go_to(position=%f,%f,%f m,
+             yaw=%f rad,
+             duration=%f s,
+             relative=%d,
+             group_mask=%d)"""
             % (
+                name,
                 request.goal.x,
                 request.goal.y,
                 request.goal.z,
@@ -257,11 +277,11 @@ class CrazyflieServer(Node):
         return response
 
     def _notify_setpoints_stop_callback(self, request, response, name='all'):
-        self.get_logger().info('Notify setpoint stop not yet implemented')
+        self.get_logger().info(f'[{name}] Notify setpoint stop not yet implemented')
         return response
 
     def _upload_trajectory_callback(self, request, response, name='all'):
-        self.get_logger().info('Upload trajectory(id=%d)' % (request.trajectory_id))
+        self.get_logger().info('[%s] Upload trajectory(id=%d)' % (name, request.trajectory_id))
 
         cfs = self.cfs if name == 'all' else {name: self.cfs[name]}
         for _, cf in cfs.items():
@@ -285,8 +305,9 @@ class CrazyflieServer(Node):
 
     def _start_trajectory_callback(self, request, response, name='all'):
         self.get_logger().info(
-            'start_trajectory(id=%d, timescale=%f, reverse=%d, relative=%d, group_mask=%d)'
+            '[%s] start_trajectory(id=%d, timescale=%f, reverse=%d, relative=%d, group_mask=%d)'
             % (
+                name,
                 request.trajectory_id,
                 request.timescale,
                 request.reversed,

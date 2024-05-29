@@ -28,7 +28,13 @@ First Installation
     .. code-block:: bash
 
         sudo apt install libboost-program-options-dev libusb-1.0-0-dev
-        pip3 install rowan
+        pip3 install rowan nicegui
+
+   Then install the motion capture ROS 2 package for your ROS distro
+
+    .. code-block:: bash
+
+        sudo apt-get ros-*DISTRO*-motion-capture-tracking 
 
     If you are planning to use the CFlib backend, do:
 
@@ -44,14 +50,13 @@ First Installation
         mkdir -p ros2_ws/src
         cd ros2_ws/src
         git clone https://github.com/IMRCLab/crazyswarm2 --recursive
-        git clone --branch ros2 --recursive https://github.com/IMRCLab/motion_capture_tracking.git
 
 4. Build your ROS 2 workspace
 
     .. code-block:: bash
 
         cd ../
-        colcon build --symlink-install
+        colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 
     .. note::
        symlink-install allows you to edit Python and config files without running `colcon build` every time.
@@ -99,7 +104,7 @@ You can update your local copy using the following commands:
     git submodule sync
     git submodule update --init --recursive
     cd ../../
-    colcon build --symlink-install
+    colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 
 .. Once you have completed installation,

@@ -67,8 +67,8 @@ if __name__ == '__main__':
 	RIGHT_DIR = [0, -1]
 	def dot(a, b):
 		return a[0] * b[0] + a[1] * b[1]
-	pixel_x = [180 * dot(pos, RIGHT_DIR) for pos in positions]
-	pixel_y = [180 * dot(pos, DOWN_DIR) for pos in positions]
+	pixel_x = [120 * dot(pos, RIGHT_DIR) for pos in positions]
+	pixel_y = [120 * dot(pos, DOWN_DIR) for pos in positions]
 	xmin, ymin = min(pixel_x), min(pixel_y)
 	xmax, ymax = max(pixel_x), max(pixel_y)
 

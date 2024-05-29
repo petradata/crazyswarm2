@@ -14,8 +14,8 @@ from collections import defaultdict
 # from .visualizer import visNull
 
 
-from crazyflie_interfaces.msg import FullState, Position, TrajectoryPolynomialPiece, DesCableAngles, DesCableAnglesItem, DesCableStates, DesCableStatesItem
-from crazyflie_interfaces.srv import GoTo, Land,\
+from crazyflie_interfaces.msg import FullState, Position, Status, TrajectoryPolynomialPiece, DesCableAngles, DesCableAnglesItem, DesCableStates, DesCableStatesItem
+from crazyflie_interfaces.srv import Arm, GoTo, Land,\
     NotifySetpointsStop, StartTrajectory, Takeoff, UploadTrajectory
 from geometry_msgs.msg import Point
 import numpy as np
@@ -133,9 +133,15 @@ class Crazyflie:
         self.notifySetpointsStopService = node.create_client(
             NotifySetpointsStop, prefix + '/notify_setpoints_stop')
         self.notifySetpointsStopService.wait_for_service()
+        self.armService = node.create_client(
+            Arm, prefix + '/arm')
+        # self.armService.wait_for_service()
         self.setParamsService = node.create_client(
             SetParameters, '/crazyflie_server/set_parameters')
         self.setParamsService.wait_for_service()
+        self.statusSubscriber = node.create_subscription(
+            Status, f'{self.prefix}/status', self.status_topic_callback, 10)
+        self.status = {}
 
         # Query some settings
         getParamsService = node.create_client(GetParameters, '/crazyflie_server/get_parameters')
@@ -463,6 +469,21 @@ class Crazyflie:
         req.group_mask = groupMask
         self.notifySetpointsStopService.call_async(req)
 
+    def arm(self, arm=True):
+        """
+        Arms the quadrotor.
+
+        For a brushless or Bolt-based drone the motors start spinning and flight
+        is enabled.
+
+        Args:
+            arm (boolean): True if the motors should be armed, False otherwise.
+
+        """
+        req = Arm.Request()
+        req.arm = arm
+        self.armService.call_async(req)
+
     # def position(self):
     #     """Returns the last true position measurement from motion capture.
 
@@ -701,6 +722,36 @@ class Crazyflie:
     #     self.setParam('ring/solidGreen', int(g * 255))
     #     self.setParam('ring/solidBlue', int(b * 255))
 
+    def status_topic_callback(self, msg):
+        """
+        Call back for topic /cfXXX/status.
+
+        Update the status attribute every time a crazyflie_interfaces/msg/Status
+        message is published on the topic /cfXXX/status
+        """
+        self.status = {'id': msg.header.frame_id,
+                       'timestamp_sec': msg.header.stamp.sec,
+                       'timestamp_nsec': msg.header.stamp.nanosec,
+                       'supervisor': msg.supervisor_info,
+                       'battery': msg.battery_voltage,
+                       'pm_state': msg.pm_state,
+                       'rssi': msg.rssi,
+                       'num_rx_broadcast': msg.num_rx_broadcast,
+                       'num_tx_broadcast': msg.num_tx_broadcast,
+                       'num_rx_unicast': msg.num_rx_unicast,
+                       'num_tx_unicast': msg.num_tx_unicast}
+
+    def get_status(self):
+        """
+        Return the status attribute.
+
+        Status is a dictionary containing:
+        frame id, timestamp, supervisor info, battery voltage, pm state, rssi, nb of received or
+        transmitted broadcast or unicast messages. see crazyflie_interfaces/msg/Status for details
+        """
+        # self.node.get_logger().info(f'Crazyflie.get_status() was called {self.status}')
+        return self.status
+
 
 class CrazyflieServer(rclpy.node.Node):
     """
@@ -719,6 +770,8 @@ class CrazyflieServer(rclpy.node.Node):
     def __init__(self):
         """Initialize the server. Waits for all ROS services before returning."""
         super().__init__('CrazyflieAPI')
+
+        # wait for server to be fully started
         self.emergencyService = self.create_client(Empty, 'all/emergency')
         self.emergencyService.wait_for_service()
 
@@ -730,6 +783,8 @@ class CrazyflieServer(rclpy.node.Node):
         self.goToService.wait_for_service()
         self.startTrajectoryService = self.create_client(StartTrajectory, 'all/start_trajectory')
         self.startTrajectoryService.wait_for_service()
+        self.armService = self.create_client(Arm, 'all/arm')
+        # self.armService.wait_for_service()
         self.setParamsService = self.create_client(
             SetParameters, '/crazyflie_server/set_parameters')
         self.setParamsService.wait_for_service()
@@ -924,27 +979,37 @@ class CrazyflieServer(rclpy.node.Node):
         req.relative = relative
         self.startTrajectoryService.call_async(req)
 
+    def arm(self, arm=True):
+        """
+        Broadcasted arming.
+
+        For a brushless or Bolt-based drone the motors start spinning and flight
+        is enabled.
+
+        Args:
+            arm (boolean): True if the motors should be armed, False otherwise.
+
+        """
+        req = Arm.Request()
+        req.arm = arm
+        self.armService.call_async(req)
+
     def setParam(self, name, value):
-        """Broadcasted setParam. See Crazyflie.setParam() for details."""
-        param_name = "all.params." + name
-        param_type = None
-        for cf in self.crazyflies:
-            if name in cf.paramTypeDict:
-                param_type = cf.paramTypeDict[name]
-                break
-        if param_type is None:
-            self.get_logger().error("Unknown param type for param {}!".format(name))
-            return
-        if param_type == ParameterType.PARAMETER_INTEGER:
-            param_value = ParameterValue(type=param_type, integer_value=int(value))
-        elif param_type == ParameterType.PARAMETER_DOUBLE:
-            param_value = ParameterValue(type=param_type, double_value=float(value))
-        else:
-            self.get_logger().error("Unsupported param type for param {} of type {}!".format(name, param_type))
-            return
-        req = SetParameters.Request()
-        req.parameters = [Parameter(name=param_name, value=param_value)]
-        self.setParamsService.call_async(req)
+        """Set parameter via broadcasts. See Crazyflie.setParam for details."""
+        try:
+            param_name = 'all.params.' + name
+            param_type = self.paramTypeDict[name]
+            if param_type == ParameterType.PARAMETER_INTEGER:
+                param_value = ParameterValue(type=param_type, integer_value=int(value))
+            elif param_type == ParameterType.PARAMETER_DOUBLE:
+                param_value = ParameterValue(type=param_type, double_value=float(value))
+            req = SetParameters.Request()
+            req.parameters = [Parameter(name=param_name, value=param_value)]
+            self.setParamsService.call_async(req)
+        except KeyError as e:
+            self.get_logger().warn(f'(crazyflie.py)setParam : keyError raised {e}')
+        except Exception as e:
+            self.get_logger().warn(f'(crazyflie.py)setParam : exception raised {e}')
 
             
     def cmdFullState(self, pos, vel, acc, q, omega):
