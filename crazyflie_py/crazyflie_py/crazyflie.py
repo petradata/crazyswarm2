@@ -140,7 +140,7 @@ class Crazyflie:
             Status, f'{self.prefix}/status', self.status_topic_callback, 10)
         self.status = {}
         self.downloadUSDService = node.create_client(
-            DownloadUSD, prefix + '/downloadUSD')
+            DownloadUSD, prefix + '/download_usd')
         self.downloadUSDService.wait_for_service()
 
         # Query some settings
@@ -735,18 +735,25 @@ class Crazyflie:
         # self.node.get_logger().info(f'Crazyflie.get_status() was called {self.status}')
         return self.status
     
-    def downloadUSD(self, outputfile, uri="radio://0/80/2M/E7E7E7E7E7", verbose=False):
+    # def downloadUSD(self, outputfile, uri="radio://0/80/2M/E7E7E7E7E7", verbose=False):
+    def downloadUSD(self, outputfile, verbose=False):
 
         req = DownloadUSD.Request()
         req.outputfile = outputfile
-        req.uri = uri
+        # req.uri = uri
         req.verbose = verbose
-        future = self.downloadUSDService.call_async(req)
-        self.node.get_logger().info(f'Crazyflie.downloadUSD was called with args {outputfile}, {uri}, {verbose}')
-        while rclpy.ok():
-            rclpy.spin_once(self.node)
-            if future.done():
-                break
+        future = self.downloadUSDService.call_async(req)   #when I comment this I get : File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/client.py", line 113, in call_async raise TypeError()
+        self.node.get_logger().info(f'Crazyflie.downloadUSD was called with args {outputfile}, {verbose}')
+        # while rclpy.ok():
+        #     rclpy.spin_once(self.node)
+        #     if future.done():
+        #         break
+
+        future = self.downloadUSDService.call_async(req)   #with this line I get : File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 711, in wait_for_ready_callbacks   return next(self._cb_iter)    ValueError: generator already executing
+        # future = self.setParamsService.call_async(req)   #with this line I get : File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/client.py", line 113, in call_async raise TypeError()
+        rclpy.spin_until_future_complete(self.node, future)
+        
+        rclpy.spin_until_future_complete(self.node, future)
 
 
 

@@ -14,6 +14,7 @@
 #include "crazyflie_interfaces/srv/land.hpp"
 #include "crazyflie_interfaces/srv/go_to.hpp"
 #include "crazyflie_interfaces/srv/notify_setpoints_stop.hpp"
+#include "crazyflie_interfaces/srv/download_usd.hpp" ////////////////////////////////////////////
 #include "std_msgs/msg/string.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
@@ -36,6 +37,7 @@ using crazyflie_interfaces::srv::Land;
 using crazyflie_interfaces::srv::GoTo;
 using crazyflie_interfaces::srv::UploadTrajectory;
 using crazyflie_interfaces::srv::NotifySetpointsStop;
+using crazyflie_interfaces::srv::DownloadUSD; /////////////////////////////////////////////////
 using std_srvs::srv::Empty;
 
 using motion_capture_tracking_interfaces::msg::NamedPoseArray;
@@ -163,7 +165,7 @@ public:
     service_go_to_ = node->create_service<GoTo>(name + "/go_to", std::bind(&CrazyflieROS::go_to, this, _1, _2), service_qos, callback_group_cf_srv);
     service_upload_trajectory_ = node->create_service<UploadTrajectory>(name + "/upload_trajectory", std::bind(&CrazyflieROS::upload_trajectory, this, _1, _2), service_qos, callback_group_cf_srv);
     service_notify_setpoints_stop_ = node->create_service<NotifySetpointsStop>(name + "/notify_setpoints_stop", std::bind(&CrazyflieROS::notify_setpoints_stop, this, _1, _2), service_qos, callback_group_cf_srv);
-
+    service_download_usd_ = node->create_service<DownloadUSD>(name + "/download_usd", std::bind(&CrazyflieROS::download_usd, this, _1, _2), service_qos, callback_group_cf_srv);
     // Topics
 
     subscription_cmd_vel_legacy_ = node->create_subscription<geometry_msgs::msg::Twist>(name + "/cmd_vel_legacy", rclcpp::SystemDefaultsQoS(), std::bind(&CrazyflieROS::cmd_vel_legacy_changed, this, _1), sub_opt_cf_cmd);
@@ -900,6 +902,34 @@ private:
     last_on_latency_ = std::chrono::steady_clock::now();
   }
 
+  void download_usd(const std::shared_ptr<DownloadUSD::Request> request,
+                         std::shared_ptr<DownloadUSD::Response> response)
+  {
+    // bool verbose = request->verbose;
+    // std::string outputfile = request->outputfile;
+    RCLCPP_INFO(logger_, "call to download_usd");
+    bool verbose = true; //change this later to actually use the arguments passed in the srv request
+    std::string outputfile = "SDlogresult"; //change this later to actually use the arguments passed in the srv request
+    std::vector<uint8_t> data;
+
+    auto start = std::chrono::high_resolution_clock::now();
+    cf_.readUSDLogFile(data);
+    auto end = std::chrono::high_resolution_clock::now();
+    
+    if (verbose) {
+      std::chrono::duration<double> duration = end-start;
+      double t = duration.count();
+
+      std::cout << "read " << data.size() << " in " << t << " s. (" << data.size() / t << " B/s)." << std::endl;
+    }
+
+    std::cout << "read " << data.size() << std::endl;
+
+    std::ofstream out(outputfile, std::ios::binary);
+    out.write(reinterpret_cast<const char*>(data.data()), data.size());
+    return;
+  }
+
 private:
   rclcpp::Logger logger_;
   CrazyflieLogger cf_logger_;
@@ -918,6 +948,7 @@ private:
   rclcpp::Service<GoTo>::SharedPtr service_go_to_;
   rclcpp::Service<UploadTrajectory>::SharedPtr service_upload_trajectory_;
   rclcpp::Service<NotifySetpointsStop>::SharedPtr service_notify_setpoints_stop_;
+  rclcpp::Service<DownloadUSD>::SharedPtr service_download_usd_;
 
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr subscription_cmd_vel_legacy_;
   rclcpp::Subscription<crazyflie_interfaces::msg::FullState>::SharedPtr subscription_cmd_full_state_;
@@ -1100,6 +1131,7 @@ public:
     service_land_ = this->create_service<Land>("all/land", std::bind(&CrazyflieServer::land, this, _1, _2), service_qos, callback_group_all_srv_);
     service_go_to_ = this->create_service<GoTo>("all/go_to", std::bind(&CrazyflieServer::go_to, this, _1, _2), service_qos, callback_group_all_srv_);
     service_notify_setpoints_stop_ = this->create_service<NotifySetpointsStop>("all/notify_setpoints_stop", std::bind(&CrazyflieServer::notify_setpoints_stop, this, _1, _2), service_qos, callback_group_all_srv_);
+    // service_download_usd_ = this->create_service<DownloadUSD>("all/download_usd", std::bind(&CrazyflieServer::download_usd, this, _1, _2), service_qos, callback_group_all_srv_);
 
     // This is the last service to announce and can be used to check if the server is fully available
     service_emergency_ = this->create_service<Empty>("all/emergency", std::bind(&CrazyflieServer::emergency, this, _1, _2), service_qos, callback_group_all_srv_);
@@ -1427,72 +1459,6 @@ private:
       RCLCPP_WARN(logger_, "[all] At least two objects with the same id (%d, %s, %s)", id, name.c_str(), iter->first.c_str());
     } else {
       name_to_id_.insert(std::make_pair(name, id));
-    }
-  }
-
-  bool download_USD(std::string outputfile, std::string uri = "radio://0/80/2M/E7E7E7E7E7", bool verbose = false) 
-  {
-    RCLCPP_INFO(logger_, "download_USD cpp was called");
-    try
-    {
-      Crazyflie cf(uri);
-      cf.requestParamToc();
-
-      const Crazyflie::ParamTocEntry* bcUSD = cf.getParamTocEntry("deck", "bcUSD");
-      const Crazyflie::ParamTocEntry* logging = cf.getParamTocEntry("usd", "logging");
-
-      if (bcUSD && logging) {
-        if (cf.getParam<uint8_t>(bcUSD->id) != 1) {
-          std::cerr << "USD deck is not initialized!" << std::endl;
-          return 1;
-        }
-        if (cf.getParam<uint8_t>(logging->id) != 0) {
-          std::cout << "Logging still enabled. Disabling logging." << std::endl;
-          cf.setParam<uint8_t>(logging->id, 0);
-          // return 1;
-        }
-      } else {
-        std::cerr << "Could not find USD deck logging variables! Are you using the latest firmware?" << std::endl;
-        return 1;
-      }
-
-      cf.requestMemoryToc();
-
-      if (verbose) {
-        auto iter = cf.memoriesBegin();
-        const auto end = cf.memoriesEnd();
-        for (;iter != end; ++iter) {
-          if (iter->type == Crazyflie::MemoryTypeUSD) {
-            std::cout << "File is " << iter->size << " bytes." << std::endl;
-            break;
-          }
-        }
-      }
-
-      std::vector<uint8_t> data;
-
-      auto start = std::chrono::high_resolution_clock::now();
-      cf.readUSDLogFile(data);
-      auto end = std::chrono::high_resolution_clock::now();
-      
-      if (verbose) {
-        std::chrono::duration<double> duration = end-start;
-        double t = duration.count();
-
-        std::cout << "read " << data.size() << " in " << t << " s. (" << data.size() / t << " B/s)." << std::endl;
-      }
-
-      std::cout << "read " << data.size() << std::endl;
-
-      std::ofstream out(outputfile, std::ios::binary);
-      out.write(reinterpret_cast<const char*>(data.data()), data.size());
-
-      return 0;
-    }
-    catch(std::exception& e)
-    {
-      std::cerr << e.what() << std::endl;
-      return 1;
     }
   }
 
