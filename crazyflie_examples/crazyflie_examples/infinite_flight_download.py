@@ -10,9 +10,6 @@ import time
 import threading
 import shutil
 import os
-from subprocess import Popen, PIPE, TimeoutExpired, STDOUT
-import atexit
-import signal
 
 #supervisor bitfield constants
 CAN_BE_ARMED = 1    # 0b00000001
@@ -44,61 +41,16 @@ def is_crashed(swarm : Crazyswarm, ros2_ws):
                 cf.downloadUSD(outputfile, verbose=True)
             print("Sd download finished")
             os._exit(0)
-            # downloadSD_PIPE_file = str(ros2_ws) + "/infinite_flight_results/SD_download_PIPE.txt"
-            # with open(downloadSD_PIPE_file, 'w') as f:
-            #     try:               
-            #         # src = "source " + str(ros2_ws) + '/install/setup.bash' 
-            #         # command = f"{src} && ros2 run crazyflie downloadUSDLogfile --output SDlogfile" #if CF doesn't use default URI, add --uri custom_uri (e.g --uri radio://0/80/2M/E7E7E7E70B)
-            #         # downloadSD= Popen(command, shell=True, stderr=STDOUT, stdout=f, text=True,         #download the log file in ....../ros2_ws/results/test_xxxxxxx/
-            #         #                     cwd= ros2_ws / "infinite_flight_results" ,start_new_session=True, executable="/bin/bash") 
-            #         # atexit.register(clean_process, downloadSD)
-            #         # downloadSD.wait(timeout=180)
-            #         f.write('success')
-            #         print("download successful")
-            #         os._exit(0)  
-            #         #we need to call _exit to finish the whole script because sys.exit only finishes this thread
-            #         #but _exit doesn't call cleanup handlers, flush stdio buffers, etc. Is this an issue ?
-                    
-                    
-            #     except TimeoutExpired:
-            #         # clean_process(downloadSD)
-            #         print("Downloading SD card data was killed for taking too long")
-            #         f.write('\n \n \n#########################################################\n')
-            #         f.write("Downloading SD card data was killed for taking too long !\n")
-            #         f.write('#########################################################\n \n \n \n')
-            #         os._exit(1)
-                     
         else:
             print("all good")
-            
-def clean_process(process:Popen) -> int :
-    '''Kills process and its children on exit if they aren't already terminated (called with atexit). Returns 0 on termination, 1 if SIGKILL was needed''' 
-    if process.poll() == None:
-        group_id = os.getpgid(process.pid)
-        print(f"cleaning process {group_id}")
-        os.killpg(group_id, signal.SIGTERM)
-        time.sleep(0.01) #necessary delay before first poll
-        i=0
-        while i < 10 and process.poll() == None:  #in case the process termination is lazy and takes some time, we wait up to 0.5 sec per process
-            if process.poll() != None:
-                return 0  #if we have a returncode-> it terminated
-            time.sleep(0.05) #if not wait a bit longer
-        if(i == 9):
-            os.killpg(group_id, signal.SIGKILL)
-            return 1  #after 0.5s we stop waiting, consider it did not terminate correctly and kill it
-        return 0
-    else:
-        return 0 #process already terminated
 
 
 def main():
-    #delete previous logfiles if they exist
-    # if(Path(Path.home() / ".ros/log").exists()): #delete log files of the previous test
-        # shutil.rmtree(Path.home() / ".ros/log")
-    #create folder where the logfiles of the crash will be downloaded
     ros2_ws = Path.home() / "ros2_ws"
+    #delete previous logfiles if they exist
     if(Path(ros2_ws / "infinite_flight_results").exists()):
         shutil.rmtree(ros2_ws / "infinite_flight_results")  
+    #create folder where the logfiles of the crash will be downloaded
     os.makedirs(ros2_ws / "infinite_flight_results")
     swarm = Crazyswarm()
     timeHelper = swarm.timeHelper
@@ -110,13 +62,12 @@ def main():
     
     #enable logging
     allcfs.setParam("usd.logging", 1)
-    print("before upload traj", time.time())
     TIMESCALE = 1.0
     for cf in allcfs.crazyflies: #sometimes we get stuck at this for loop forever. Is it because upload_trajectory doesn't work properly ?
-        print(cf)
+        print("starting upload traj loop", time.time())
         cf.uploadTrajectory(0, 0, traj1)
     timeHelper.sleep(1)
-    print("upload traj finished", time.time())
+    print("upload traj loop finished", time.time())
 
     # pm_state : 0 = on battery  1 = charging  2 = charged  3 = low power  4 = shutdown
     flight_counter = 1
