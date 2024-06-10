@@ -742,18 +742,17 @@ class Crazyflie:
         req.outputfile = outputfile
         # req.uri = uri
         req.verbose = verbose
-        future = self.downloadUSDService.call_async(req)   #when I comment this I get : File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/client.py", line 113, in call_async raise TypeError()
         self.node.get_logger().info(f'Crazyflie.downloadUSD was called with args {outputfile}, {verbose}')
+
+        future = self.downloadUSDService.call_async(req)   #with this line I get : File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 711, in wait_for_ready_callbacks   return next(self._cb_iter)    ValueError: generator already executing
+        # future = self.setParamsService.call_async(req)   #with this line I get : File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/client.py", line 113, in call_async raise TypeError()
+        
+        rclpy.spin_until_future_complete(self.node, future)
+        
         # while rclpy.ok():
         #     rclpy.spin_once(self.node)
         #     if future.done():
         #         break
-
-        future = self.downloadUSDService.call_async(req)   #with this line I get : File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 711, in wait_for_ready_callbacks   return next(self._cb_iter)    ValueError: generator already executing
-        # future = self.setParamsService.call_async(req)   #with this line I get : File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/client.py", line 113, in call_async raise TypeError()
-        rclpy.spin_until_future_complete(self.node, future)
-        
-        rclpy.spin_until_future_complete(self.node, future)
 
 
 
