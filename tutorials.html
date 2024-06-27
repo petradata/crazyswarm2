@@ -245,14 +245,14 @@ With a <a class="reference external" href="https://www.bitcraze.io/products/flow
 <span class="w">        </span><span class="nv">output</span><span class="o">=</span><span class="s1">&#39;screen&#39;</span>,
 <span class="w">        </span><span class="nv">parameters</span><span class="o">=[{</span><span class="s2">&quot;hover_height&quot;</span>:<span class="w"> </span><span class="m">0</span>.3<span class="o">}</span>,
 <span class="w">                    </span><span class="o">{</span><span class="s2">&quot;incoming_twist_topic&quot;</span>:<span class="w"> </span><span class="s2">&quot;/cmd_vel&quot;</span><span class="o">}</span>,
-<span class="w">                    </span><span class="o">{</span><span class="s2">&quot;robot_prefix&quot;</span>:<span class="w"> </span><span class="s2">&quot;/cf1&quot;</span><span class="o">}]</span>
+<span class="w">                    </span><span class="o">{</span><span class="s2">&quot;robot_prefix&quot;</span>:<span class="w"> </span><span class="s2">&quot;/cf231&quot;</span><span class="o">}]</span>
 <span class="w">    </span><span class="o">)</span>,
 <span class="w">    </span>Node<span class="o">(</span>
 <span class="w">    </span><span class="nv">parameters</span><span class="o">=[</span>
 <span class="w">      </span><span class="o">{</span><span class="s1">&#39;odom_frame&#39;</span>:<span class="w"> </span><span class="s1">&#39;odom&#39;</span><span class="o">}</span>,
-<span class="w">      </span><span class="o">{</span><span class="s1">&#39;map_frame&#39;</span>:<span class="w"> </span><span class="s1">&#39;world&#39;</span><span class="o">}</span>,
-<span class="w">      </span><span class="o">{</span><span class="s1">&#39;base_frame&#39;</span>:<span class="w"> </span><span class="s1">&#39;cf1&#39;</span><span class="o">}</span>,
-<span class="w">      </span><span class="o">{</span><span class="s1">&#39;scan_topic&#39;</span>:<span class="w"> </span><span class="s1">&#39;/cf1/scan&#39;</span><span class="o">}</span>,
+<span class="w">      </span><span class="o">{</span><span class="s1">&#39;map_frame&#39;</span>:<span class="w"> </span><span class="s1">&#39;map&#39;</span><span class="o">}</span>,
+<span class="w">      </span><span class="o">{</span><span class="s1">&#39;base_frame&#39;</span>:<span class="w"> </span><span class="s1">&#39;cf231&#39;</span><span class="o">}</span>,
+<span class="w">      </span><span class="o">{</span><span class="s1">&#39;scan_topic&#39;</span>:<span class="w"> </span><span class="s1">&#39;/cf231/scan&#39;</span><span class="o">}</span>,
 <span class="w">      </span><span class="o">{</span><span class="s1">&#39;use_scan_matching&#39;</span>:<span class="w"> </span>False<span class="o">}</span>,
 <span class="w">      </span><span class="o">{</span><span class="s1">&#39;max_laser_range&#39;</span>:<span class="w"> </span><span class="m">3</span>.5<span class="o">}</span>,
 <span class="w">      </span><span class="o">{</span><span class="s1">&#39;resolution&#39;</span>:<span class="w"> </span><span class="m">0</span>.1<span class="o">}</span>,
@@ -269,7 +269,7 @@ With a <a class="reference external" href="https://www.bitcraze.io/products/flow
 </div>
 <p>Here is an explanation of the nodes:</p>
 <ul class="simple">
-<li><p>The first node enables the crazyflie server, namely the python version (cflib) as that currently has logging enabled. This takes the crazyflies.yaml file you just edited and uses those values to set up the crazyflie.</p></li>
+<li><p>The first node enables the crazyflie server, namely the python version (cflib) as that currently has logging enabled. This takes the crazyflies.yaml file you just edited and uses those values to set up the crazyflie. You might need to change some topic strings based on your Crazyflie name (<cite>/cf231</cite> to something else)</p></li>
 <li><p>The second node is a velocity command handler, which takes an incoming twist message, makes the Crazyflie take off to a fixed height and enables velocity control of external packages (you’ll see why soon enough).</p></li>
 <li><p>The third node is the slam toolbox node. You noted that we gave it some different parameters, where we upped the speed of the map generation, decreased the resolution and turn of ray matching as mentioned in the warning above.</p></li>
 </ul>
@@ -310,7 +310,7 @@ rviz2
 </div>
 <p>Add the following displays and panels to RVIZ:</p>
 <ul class="simple">
-<li><p>Changed the ‘Fixed frame’ to ‘world</p></li>
+<li><p>Changed the ‘Fixed frame’ to ‘map’</p></li>
 <li><p>‘Add’ button under displays and ‘by topic’ tab, select the ‘/map’ topic.</p></li>
 <li><p>‘Add’ button under displays and ‘by display type’ add a transform.</p></li>
 <li><p>‘Panels’ on the top menu, select ‘add new panel’ and select the SLAMToolBoxPlugin</p></li>
