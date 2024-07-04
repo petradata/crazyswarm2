@@ -51,13 +51,15 @@ jobs:
       - name: install pip dependencies
           # TODO: would be better to follow https://answers.ros.org/question/370666/how-to-declare-an-external-python-dependency-in-ros2/
           # but this requires some upstream changes
-        shell: bash
         run: |
-          virtualenv -p python3 ./venv
-          source ./venv/bin/activate
-          touch ./venv/COLCON_IGNORE
-          python3 -m pip install rowan
-          echo PATH=$PATH >> $GITHUB_ENV
+          sudo rm -f /usr/lib/python3.12/EXTERNALLY-MANAGED
+          pip install rowan
+        # run: |
+        #   virtualenv -p python3 ./venv
+        #   source ./venv/bin/activate
+        #   touch ./venv/COLCON_IGNORE
+        #   python3 -m pip install rowan
+        #   echo PATH=$PATH >> $GITHUB_ENV
 
       - uses: actions/checkout@v2
       - name: build and test ROS 2
