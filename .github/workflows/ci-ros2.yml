@@ -46,13 +46,15 @@ jobs:
       - name: install dependencies
         run: |
           sudo apt update
-          sudo apt install -y libusb-1.0-0-dev
+          sudo apt install -y libusb-1.0-0-dev python3-pip
 
       - name: install pip dependencies
           # TODO: would be better to follow https://answers.ros.org/question/370666/how-to-declare-an-external-python-dependency-in-ros2/
           # but this requires some upstream changes
         run: |
-          pip install rowan
+          python3 -m venv ~/venv
+          ~/venv/bin/pip install rowan
+          export PATH="$PATH:~/venv/bin"
 
       - uses: actions/checkout@v2
       - name: build and test ROS 2
