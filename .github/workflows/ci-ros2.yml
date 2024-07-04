@@ -46,7 +46,7 @@ jobs:
       - name: install dependencies
         run: |
           sudo apt update
-          sudo apt install -y libusb-1.0-0-dev python3-pip python3-venv
+          sudo apt install -y libboost-program-options-dev libusb-1.0-0-dev python3-pip python3-venv
 
       - name: install pip dependencies
           # TODO: would be better to follow https://answers.ros.org/question/370666/how-to-declare-an-external-python-dependency-in-ros2/
