@@ -4,7 +4,7 @@ robots:
     enabled: true
     uri: radio://0/80/2M/E7E7E7E7E7
     initial_position: [0.0, 0.0, 0.0]
-    type: cf21  # see robot_types
+    type: cfbl  # see robot_types
     # firmware_params:
     #   kalman:
     #     pNAcc_xy: 1.0 # default 0.5
@@ -52,6 +52,36 @@ robot_types:
     #      frequency: 1
     #      vars: ["acc.x", "acc.y", "acc.z"]
 
+  cfbl:
+    motion_capture:
+      enabled: true
+      # only if enabled; see motion_capture.yaml
+      marker: systemid # default_single_marker
+      dynamics: default
+    big_quad: false
+    battery:
+      voltage_warning: 3.8  # V
+      voltage_critical: 3.7 # V
+    firmware_params:
+      pwm:
+        d00: 0.16609668469985447
+        d01: 0.0
+        d10: 0.02297914810965436
+        d20: 0.0001878280261464696
+        d11: 0.0
+      ctrlLee:
+        mass: 0.037
+    # firmware_logging:
+    #   enabled: true
+    #   default_topics:
+    #   pose:
+    #     frequency: 1 # Hz
+    #   custom_topics:
+    #    topic_name3: 
+    #      frequency: 1
+    #      vars: ["acc.x", "acc.y", "acc.z"]
+
+
   cf21_mocap_deck:
     motion_capture:
       enabled: true
@@ -93,7 +123,7 @@ all:
       enHighLevel: 1
     stabilizer:
       estimator: 2 # 1: complementary, 2: kalman
-      controller: 2 # 1: PID, 2: mellinger
+      controller: 5 # 1: PID, 2: mellinger
     # ring:
     #   effect: 16 # 6: double spinner, 7: solid color, 16: packetRate
     #   solidBlue: 255 # if set to solid color
