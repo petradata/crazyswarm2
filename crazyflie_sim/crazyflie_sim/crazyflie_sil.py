@@ -83,18 +83,23 @@ class CrazyflieSIL:
         self.controller_name = controller_name
 
         # set up controller
+        self.controller_state = None
         if controller_name == 'none':
             self.controller = None
         elif controller_name == 'pid':
             firm.controllerPidInit()
             self.controller = firm.controllerPid
         elif controller_name == 'mellinger':
-            self.mellinger_control = firm.controllerMellinger_t()
-            firm.controllerMellingerInit(self.mellinger_control)
+            self.controller_state = firm.controllerMellinger_t()
+            firm.controllerMellingerInit(self.controller_state)
             self.controller = firm.controllerMellinger
         elif controller_name == 'brescianini':
             firm.controllerBrescianiniInit()
             self.controller = firm.controllerBrescianini
+        elif controller_name == 'lee':
+            self.controller_state = firm.controllerLee_t()
+            firm.controllerLeeInit(self.controller_state)
+            self.controller = firm.controllerLee
         else:
             raise ValueError('Unknown controller {}'.format(controller_name))
 
@@ -302,16 +307,17 @@ class CrazyflieSIL:
         time_in_seconds = self.time_func()
         # ticks is essentially the time in milliseconds as an integer
         tick = int(time_in_seconds * 1000)
-        if self.controller_name != 'mellinger':
+        if self.controller_state is None:
             self.controller(self.control, self.setpoint, self.sensors, self.state, tick)
         else:
             self.controller(
-                self.mellinger_control,
+                self.controller_state,
                 self.control,
                 self.setpoint,
                 self.sensors,
                 self.state,
                 tick)
+
         return self._fwcontrol_to_sim_data_types_action()
 
     # 'private' methods
