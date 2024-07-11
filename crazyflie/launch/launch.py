@@ -11,17 +11,14 @@ from launch.substitutions import LaunchConfiguration, PythonExpression
 def parse_yaml(context):
     # Load the crazyflies YAML file
     crazyflies_yaml_file = LaunchConfiguration('crazyflies_yaml_file').perform(context)
+    server_yaml_file = LaunchConfiguration('server_yaml_file').perform(context)
+
     with open(crazyflies_yaml_file, 'r') as file:
         crazyflies = yaml.safe_load(file)
 
     # server params
-    server_yaml = os.path.join(
-        get_package_share_directory('crazyflie'),
-        'config',
-        'server.yaml')
-
-    with open(server_yaml, 'r') as ymlfile:
-        server_yaml_content = yaml.safe_load(ymlfile)
+    with open(server_yaml_file, 'r') as file:
+        server_yaml_content = yaml.safe_load(file)
 
     server_yaml_content["/crazyflie_server"]["ros__parameters"]['robots'] = crazyflies['robots']
     server_yaml_content["/crazyflie_server"]["ros__parameters"]['robot_types'] = crazyflies['robot_types']
@@ -73,6 +70,11 @@ def generate_launch_description():
         get_package_share_directory('crazyflie'),
         'config',
         'crazyflies.yaml')
+    
+    default_server_yaml_path = os.path.join(
+        get_package_share_directory('crazyflie'),
+        'config',
+        'server.yaml')
 
     telop_yaml_path = os.path.join(
         get_package_share_directory('crazyflie'),
@@ -82,15 +84,15 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument('crazyflies_yaml_file', 
                               default_value=default_crazyflies_yaml_path),
-        OpaqueFunction(function=parse_yaml),
         DeclareLaunchArgument('backend', default_value='cpp'),
         DeclareLaunchArgument('debug', default_value='False'),
         DeclareLaunchArgument('rviz', default_value='False'),
         DeclareLaunchArgument('gui', default_value='True'),
         DeclareLaunchArgument('mocap', default_value='True'),
-        DeclareLaunchArgument('server_yaml_file', default_value=''),
+        DeclareLaunchArgument('server_yaml_file', default_value=default_server_yaml_path),
         DeclareLaunchArgument('teleop_yaml_file', default_value=''),
         DeclareLaunchArgument('mocap_yaml_file', default_value=''),
+        OpaqueFunction(function=parse_yaml),
         Node(
             package='motion_capture_tracking',
             executable='motion_capture_tracking_node',
@@ -126,7 +128,7 @@ def generate_launch_description():
             condition=LaunchConfigurationEquals('backend','cflib'),
             name='crazyflie_server',
             output='screen',
-            parameters= [PythonExpression(["'tmp_server.yaml' if '", LaunchConfiguration('server_yaml_file'), "' == '' else '", LaunchConfiguration('server_yaml_file'), "'"])],
+            parameters= ['tmp_server.yaml'],
         ),
         Node(
             package='crazyflie',
@@ -134,7 +136,7 @@ def generate_launch_description():
             condition=LaunchConfigurationEquals('backend','cpp'),
             name='crazyflie_server',
             output='screen',
-            parameters= [PythonExpression(["'tmp_server.yaml' if '", LaunchConfiguration('server_yaml_file'), "' == '' else '", LaunchConfiguration('server_yaml_file'), "'"])],
+            parameters= ['tmp_server.yaml'],
             prefix=PythonExpression(['"xterm -e gdb -ex run --args" if ', LaunchConfiguration('debug'), ' else ""']),
         ),
         Node(
@@ -144,7 +146,7 @@ def generate_launch_description():
             name='crazyflie_server',
             output='screen',
             emulate_tty=True,
-            parameters= [PythonExpression(["'tmp_server.yaml' if '", LaunchConfiguration('server_yaml_file'), "' == '' else '", LaunchConfiguration('server_yaml_file'), "'"])],
+            parameters= ['tmp_server.yaml'],
         ),
         Node(
             condition=LaunchConfigurationEquals('rviz', 'True'),
