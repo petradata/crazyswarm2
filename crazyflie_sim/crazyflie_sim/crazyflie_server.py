@@ -19,6 +19,7 @@ import rowan
 from std_msgs.msg import String
 from std_srvs.srv import Empty
 
+from rcl_interfaces.msg import Log
 
 # import BackendRviz from .backend_rviz
 # from .backend import *
@@ -79,9 +80,20 @@ class CrazyflieServer(Node):
                              self._ros_parameters['sim']['visualizations'][vis_key],
                              names,
                              initial_states)
+                if 'auto_activate' in self._ros_parameters['sim']['visualizations'][vis_key]:
+                    vis.active = False
+                    vis.auto_activate = True
+                else:
+                    vis.active = True
+                    vis.auto_activate = False
+
                 self.visualizations.append(vis)
 
         controller_name = backend_name = self._ros_parameters['sim']['controller']
+
+        self.sub_log = self.create_subscription(Log, 'rosout', self._rosout_callback, rclpy.qos.QoSProfile(
+                        depth=1000,
+                        durability=rclpy.qos.QoSDurabilityPolicy.TRANSIENT_LOCAL))
 
         # create robot SIL objects
         for name, initial_state in zip(names, initial_states):
@@ -179,9 +191,24 @@ class CrazyflieServer(Node):
         if not self.is_shutdown:
             self.backend.shutdown()
             for visualization in self.visualizations:
-                visualization.shutdown()
+                if visualization.active:
+                    visualization.shutdown()
 
             self.is_shutdown = True
+
+    def _rosout_callback(self, msg: Log) -> None:
+        # filter by crazyflie and add to the correct log
+        if msg.name == "crazyflie_server":
+            if "takeoff" in msg.msg:
+                for visualization in self.visualizations:
+                    if visualization.auto_activate:
+                        visualization.active = True
+        if msg.name == "crazyflie_server":
+            if "land" in msg.msg:
+                for visualization in self.visualizations:
+                    if visualization.auto_activate:
+                        visualization.active = False
+                        visualization.shutdown()
 
     def _timer_callback(self):
         # update setpoint
@@ -198,7 +225,8 @@ class CrazyflieServer(Node):
             cf.setState(state)
 
         for vis in self.visualizations:
-            vis.step(self.backend.time(), states_next, states_desired, actions)
+            if vis.active:
+                vis.step(self.backend.time(), states_next, states_desired, actions)
 
     def _param_to_dict(self, param_ros):
         """Turn ROS 2 parameters from the node into a dict."""

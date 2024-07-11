@@ -36,9 +36,12 @@ class Visualization:
                 g.ObjMeshGeometry.from_file(str(Path(__file__).resolve().parent/ "data" / "model" / "cf.obj")))
 
         self.anim = Animation(default_framerate=1.0)
+        self.start_time = None
 
     def step(self, t, states: list[State], states_desired: list[State], actions: list[Action]):
-        with self.anim.at_frame(self.vis, t) as frame:
+        if self.start_time is None:
+            self.start_time = t
+        with self.anim.at_frame(self.vis, t - self.start_time) as frame:
             for k, name in enumerate(self.names):
                 s = states[k]
                 frame[name].set_transform(

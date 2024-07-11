@@ -4,7 +4,7 @@
 
 ### Dependencies
 
-- `bpy`
+- `bpy` (pip install bpy or https://developer.blender.org/docs/handbook/building_blender/python_module/)
 - `rowan`
 - `numpy` 
 - `yaml` 
