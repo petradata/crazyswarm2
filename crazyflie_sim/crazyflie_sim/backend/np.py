@@ -17,7 +17,7 @@ class Backend:
         self.names = names
         self.clock_publisher = node.create_publisher(Clock, 'clock', 10)
         self.t = 0
-        self.dt = 0.0005
+        self.dt = 0.001
 
         self.uavs = []
         for state in states:
@@ -54,7 +54,7 @@ class Quadrotor:
 
     def __init__(self, state):
         # parameters (Crazyflie 2.0 quadrotor)
-        self.mass = 0.034  # kg
+        self.mass = 0.027  # kg
         # self.J = np.array([
         # 	[16.56,0.83,0.71],
         # 	[0.83,16.66,1.8],
@@ -91,7 +91,8 @@ class Quadrotor:
             force_in_newton = force_in_grams * 9.81 / 1000.0
             return np.maximum(force_in_newton, 0)
 
-        force = rpm_to_force(action.rpm)
+        # force = rpm_to_force(action.rpm)
+        force = action.rpm
 
         # compute next state
         eta = np.dot(self.B0, force)

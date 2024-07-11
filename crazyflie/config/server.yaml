@@ -15,13 +15,16 @@
     # simulation related
     sim:
       max_dt: 0 #0.1              # artificially limit the step() function (set to 0 to disable)
-      backend: np                 # see backend folder for a list 
+      backend: neuralswarm        # see backend folder for a list 
       visualizations:             # see visualization folder for a list
         rviz:
           enabled: true
         pdf:
-          enabled: false
+          enabled: true
           output_file: "result.pdf"
+        html:
+          enabled: true
+          output_file: "result.html"
         record_states:
           enabled: false
           output_dir: "state_info"
@@ -40,4 +43,4 @@
               calibration:
                 tvec: [0,0,0]
                 rvec: [ 0.61394313, -0.61394313,  1.48218982]   # 45 deg tilt
-      controller: mellinger # none, pid, mellinger
+      controller: lee # none, pid, mellinger, lee

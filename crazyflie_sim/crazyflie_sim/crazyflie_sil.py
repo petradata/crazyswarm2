@@ -344,12 +344,28 @@ class CrazyflieSIL:
             force_in_grams = np.polyval(p, pwm)
             force_in_newton = force_in_grams * 9.81 / 1000.0
             return np.maximum(force_in_newton, 0)
+        
+        def pwm_to_force_firmware(pwm):
+            # see src/modules/src/power_distribution_quadrotor.c
+            pwmToThrustA = 0.091492681
+            pwmToThrustB = 0.067673604
+            pwm_normalized = pwm / 65535
+            force_in_newton = pwmToThrustA * pwm_normalized**2 + pwmToThrustB * pwm_normalized
+            return np.maximum(force_in_newton, 0)
+
+        # return sim_data_types.Action(
+        #     [pwm_to_rpm(self.motors_thrust_pwm.motors.m1),
+        #      pwm_to_rpm(self.motors_thrust_pwm.motors.m2),
+        #      pwm_to_rpm(self.motors_thrust_pwm.motors.m3),
+        #      pwm_to_rpm(self.motors_thrust_pwm.motors.m4)])
+
+        # print("m1",pwm_to_force_firmware(self.motors_thrust_pwm.motors.m1))
 
         return sim_data_types.Action(
-            [pwm_to_rpm(self.motors_thrust_pwm.motors.m1),
-             pwm_to_rpm(self.motors_thrust_pwm.motors.m2),
-             pwm_to_rpm(self.motors_thrust_pwm.motors.m3),
-             pwm_to_rpm(self.motors_thrust_pwm.motors.m4)])
+            [pwm_to_force_firmware(self.motors_thrust_pwm.motors.m1),
+             pwm_to_force_firmware(self.motors_thrust_pwm.motors.m2),
+             pwm_to_force_firmware(self.motors_thrust_pwm.motors.m3),
+             pwm_to_force_firmware(self.motors_thrust_pwm.motors.m4)])
 
     @staticmethod
     def _fwsetpoint_to_sim_data_types_state(fwsetpoint):

@@ -108,7 +108,7 @@ class Backend:
         self.names = names
         self.clock_publisher = node.create_publisher(Clock, 'clock', 10)
         self.t = 0
-        self.dt = 0.0005
+        self.dt = 0.001 #0.0005
 
         self.uavs = []
         for state in states:
