@@ -28,7 +28,7 @@ def generate_launch_description():
         robot_desc = f.read()
     server_params['robot_description'] = robot_desc
 
-    crazyflie_name = '/cf231'
+    crazyflie_name = '/cf5'
 
     return LaunchDescription([
         Node(

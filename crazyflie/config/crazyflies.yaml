@@ -1,7 +1,7 @@
 # named list of all robots
 robots:
   cf231:
-    enabled: true
+    enabled: false
     uri: radio://0/80/2M/E7E7E7E7E7
     initial_position: [0.0, 0.0, 0.0]
     type: cf21  # see robot_types
@@ -15,8 +15,8 @@ robots:
     #       frequency: 1
     #       vars: ["acc.x", "acc.y"]
   cf5:
-    enabled: false
-    uri: radio://0/80/2M/E7E7E7E705
+    enabled: true
+    uri: radio://0/40/2M/E7E7E7E705
     initial_position: [0.0, -0.5, 0.0]
     type: cf21  # see robot_types
     # firmware_params:
@@ -75,10 +75,14 @@ all:
     enabled: true
     default_topics:
      # remove to disable default topic
-      pose:
-        frequency: 10 # Hz
+      # pose:
+        # frequency: 2 # Hz
       status:
         frequency: 1 # Hz
+      odom:
+        frequency: 10 # Hz
+      scan:
+        frequency: 10 # Hz
     #custom_topics:
     #  topic_name1:
     #    frequency: 10 # Hz
