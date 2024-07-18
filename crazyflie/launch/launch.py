@@ -81,12 +81,18 @@ def generate_launch_description():
         'config',
         'teleop.yaml')
     
+    default_rviz_config_path = os.path.join(
+        get_package_share_directory('crazyflie'),
+        'config',
+        'config.rviz')
+    
     return LaunchDescription([
         DeclareLaunchArgument('crazyflies_yaml_file', 
                               default_value=default_crazyflies_yaml_path),
         DeclareLaunchArgument('backend', default_value='cpp'),
         DeclareLaunchArgument('debug', default_value='False'),
         DeclareLaunchArgument('rviz', default_value='False'),
+        DeclareLaunchArgument('rviz_config_file', default_value=default_rviz_config_path),
         DeclareLaunchArgument('gui', default_value='True'),
         DeclareLaunchArgument('mocap', default_value='True'),
         DeclareLaunchArgument('server_yaml_file', default_value=default_server_yaml_path),
@@ -154,7 +160,7 @@ def generate_launch_description():
             namespace='',
             executable='rviz2',
             name='rviz2',
-            arguments=['-d' + os.path.join(get_package_share_directory('crazyflie'), 'config', 'config.rviz')],
+            arguments=['-d', LaunchConfiguration('rviz_config_file')],
             parameters=[{
                 "use_sim_time": PythonExpression(["'", LaunchConfiguration('backend'), "' == 'sim'"]),
             }]
