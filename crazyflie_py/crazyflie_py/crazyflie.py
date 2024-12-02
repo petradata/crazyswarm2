@@ -921,7 +921,7 @@ class CrazyflieServer(rclpy.node.Node):
         req.duration = rclpy.duration.Duration(seconds=duration).to_msg()
         self.landService.call_async(req)
 
-    def goTo(self, goal, yaw, duration, groupMask=0):
+    def goTo(self, goal, yaw, duration, relative=True, groupMask=0):
         """
         Broadcasted goTo - Move smoothly to goal, then hover indefinitely.
 
@@ -929,10 +929,9 @@ class CrazyflieServer(rclpy.node.Node):
         groupMask start moving at exactly the same time. Use for synchronized
         movement. Asynchronous command; returns immediately.
 
-        While the individual goTo() supports both relative and absolute
-        coordinates, the broadcasted goTo only makes sense with relative
-        coordinates (since absolute broadcasted goTo() would cause a collision).
-        Therefore, there is no `relative` kwarg.
+        The individual goTo() supports both relative and absolute
+        coordinates. However, the broadcasted goTo only makes sense with relative
+        coordinates in most cases.
 
         See docstring of :meth:`Crazyflie.goTo()` for additional details.
 
@@ -940,12 +939,16 @@ class CrazyflieServer(rclpy.node.Node):
             goal (iterable of 3 floats): The goal offset. Meters.
             yaw (float): The goal yaw angle (heading). Radians.
             duration (float): How long until the goal is reached. Seconds.
+            relative (bool): If true, the goal position is interpreted as a
+                relative offset from the current position. Otherwise, the goal
+                position is interpreted as absolute coordintates in the global
+                reference frame.
             groupMask (int): Group mask bits. See :meth:`Crazyflie.setGroupMask()` doc.
 
         """
         req = GoTo.Request()
         req.group_mask = groupMask
-        req.relative = True
+        req.relative = relative
         req.goal = arrayToGeometryPoint(goal)
         req.yaw = yaw
         req.duration = rclpy.duration.Duration(seconds=duration).to_msg()

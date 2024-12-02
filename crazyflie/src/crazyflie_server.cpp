@@ -1208,6 +1208,7 @@ private:
         auto &cfbc = bc.second;
         cfbc->goTo(request->goal.x, request->goal.y, request->goal.z, request->yaw,
                 rclcpp::Duration(request->duration).seconds(),
+                request->relative,
                 request->group_mask);
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(broadcasts_delay_between_repeats_ms_));
