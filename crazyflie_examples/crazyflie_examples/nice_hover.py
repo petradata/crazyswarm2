@@ -5,7 +5,7 @@ import numpy as np
 
 
 def main():
-    Z = 1.0
+    Z = 0.5
 
     swarm = Crazyswarm()
     timeHelper = swarm.timeHelper
@@ -17,8 +17,12 @@ def main():
         pos = np.array(cf.initialPosition) + np.array([0, 0, Z])
         cf.goTo(pos, 0, 1.0)
 
+    allcfs.setParam('usd.logging', 1)
+
     print('press button to continue...')
     swarm.input.waitUntilButtonPressed()
+
+    allcfs.setParam('usd.logging', 0)
 
     allcfs.land(targetHeight=0.02, duration=1.0+Z)
     timeHelper.sleep(1.0+Z)

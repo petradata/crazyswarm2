@@ -15,32 +15,38 @@ def main():
     traj1 = Trajectory()
     traj1.loadcsv(Path(__file__).parent / 'data/figure8.csv')
 
-    # enable logging
-    allcfs.setParam('usd.logging', 1)
-
     TRIALS = 1
-    TIMESCALE = 1.0
+    TIMESCALE = 0.7
+    HEIGHT = 0.5
     for i in range(TRIALS):
         for cf in allcfs.crazyflies:
             cf.uploadTrajectory(0, 0, traj1)
 
-        allcfs.takeoff(targetHeight=1.0, duration=2.0)
+        allcfs.takeoff(targetHeight=HEIGHT, duration=2.0)
         timeHelper.sleep(2.5)
         for cf in allcfs.crazyflies:
-            pos = np.array(cf.initialPosition) + np.array([0, 0, 1.0])
+            pos = np.array(cf.initialPosition) + np.array([0, 0, HEIGHT])
             cf.goTo(pos, 0, 2.0)
         timeHelper.sleep(2.5)
 
+        # enable logging
+        allcfs.setParam('usd.logging', 1)
+        timeHelper.sleep(3)
+
         allcfs.startTrajectory(0, timescale=TIMESCALE)
-        timeHelper.sleep(traj1.duration * TIMESCALE + 2.0)
+        timeHelper.sleep(traj1.duration * TIMESCALE)
+
+        timeHelper.sleep(3)
+        # disable logging
+        allcfs.setParam('usd.logging', 0)
+
         # allcfs.startTrajectory(0, timescale=TIMESCALE, reverse=True)
         # timeHelper.sleep(traj1.duration * TIMESCALE + 2.0)
 
         allcfs.land(targetHeight=0.06, duration=2.0)
         timeHelper.sleep(3.0)
 
-    # disable logging
-    allcfs.setParam('usd.logging', 0)
+
 
 
 if __name__ == '__main__':
