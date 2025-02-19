@@ -1,0 +1,149 @@
+# named list of all robots
+robots:
+  cf1:
+    enabled: true
+    uri: radio://0/80/2M/E7E7E7E701
+    initial_position: [0.0, 1.0, 0.0]
+    type: cf21  # see robot_types
+    # firmware_params:
+    #   kalman:
+    #     pNAcc_xy: 1.0 # default 0.5
+    # firmware_logging:
+    #   enabled: true
+    #   custom_topics:
+    #     topic_name3: 
+    #       frequency: 1
+    #       vars: ["acc.x", "acc.y"]
+  cf5:
+    enabled: false
+    uri: radio://0/80/2M/E7E7E7E705
+    initial_position: [0.0, -0.5, 0.0]
+    type: cf21  # see robot_types
+    # firmware_params:
+    #   kalman:
+    #     pNAcc_xy: 1.0 # default 0.5
+    #firmware_logging:
+    #  custom_topics:
+    #    topic_name3: 
+    #      frequency: 1
+    #      vars: ["acc.x", "acc.y", "acc.z"]
+# Definition of the various robot types
+robot_types:
+  cf21:
+    motion_capture:
+      enabled: true
+      # only if enabled; see motion_capture.yaml
+      marker: systemid
+      dynamics: default
+    big_quad: false
+    battery:
+      voltage_warning: 3.8  # V
+      voltage_critical: 3.7 # V
+    # firmware_params:
+    #   kalman:
+    #     pNAcc_xy: 1.0 # default 0.5
+    #firmware_logging:
+    #   enabled: true
+    #   default_topics:
+    #   pose:
+    #     frequency: 1 # Hz
+    #   custom_topics:
+    #    topic_name3: 
+    #      frequency: 1
+    #      vars: ["acc.x", "acc.y", "acc.z"]
+
+  cf21_mocap_deck:
+    motion_capture:
+      enabled: true
+      # only if enabled; see motion_capture.yaml
+      marker: mocap_deck
+      dynamics: default
+    big_quad: false
+    battery:
+      voltage_warning: 3.8  # V
+      voltage_critical: 3.7 # V
+
+    # firmware_params:
+    #   kalman:
+    #     pNAcc_xy: 1.0 # default 0.5
+
+# global settings for all robots
+all:
+  # firmware logging for all drones (use robot_types/type_name to set per type, or
+  # robots/drone_name to set per drone)
+  firmware_logging:
+    enabled: true
+    default_topics:
+     # remove to disable default topic
+      pose:
+        frequency: 10 # Hz
+      status:
+        frequency: 1 # Hz
+    #custom_topics:
+    #  topic_name1:
+    #    frequency: 10 # Hz
+    #    vars: ["stateEstimateZ.x", "stateEstimateZ.y", "stateEstimateZ.z", "pm.vbat"]
+    #  topic_name2:
+    #    frequency: 1 # Hz
+    #    vars: ["stabilizer.roll", "stabilizer.pitch", "stabilizer.yaw"]
+  # firmware parameters for all drones (use robot_types/type_name to set per type, or
+  # robots/drone_name to set per drone)
+  firmware_params:
+    commander:
+      enHighLevel: 1
+    stabilizer:
+      estimator: 2 # 1: complementary, 2: kalman
+      controller: 5 # 1: PID, 2: mellinger
+    ctrlLee:
+      Kpos_Px: 15.0 #2.5613 #9.0 # def: 10.0
+      Kpos_Py: 15.0 #2.4822 #9.0 # def: 10.0
+      Kpos_Pz: 15.0 #1.0091 # def: 10.0
+      Kpos_Dx: 11.0 #9.5109 #7.0  # def: 8.0
+      Kpos_Dy: 11.0 #11.2808 #7.0  # def: 8.0 
+      Kpos_Dz: 11.0 #1.0125 #  # def: 8.0  
+      Kpos_Ix: 0.0 # 0.0 #5.0
+      Kpos_Iy: 0.0 # 0.0 #5.0
+      Kpos_Iz: 3.0 # 8.0 # 0.0 #8.0
+      # 0.0265 0.0738 0.0001
+      KR_x: 0.008 #0.0265 # #0.0055   # def: 0.005  
+      KR_y: 0.008 #0.0738 # #0.0055  # def: 0.005
+      KR_z: 0.03 #0.0001 #  #0.008   # def: 0.005
+      Kw_x: 0.0018 #0.0026  #0.0013 #0.0013 # def: 0.0009
+      Kw_y: 0.0018 #0.0020  #0.0013 #0.0013  # def: 0.0009
+      Kw_z: 0.005  # def: 0.0012
+      KI_x: 0.005 #0.012 #0.0 #0.012 #0.009 #0.015
+      KI_y: 0.005 #0.018 #0.0 #0.018 #0.009 #0.015
+      KI_z: 0.005 #0.015 #0.0 #0.015 #0.009 #0.015
+      mass: 0.0352
+
+      # indi: 3
+      indi: 3
+
+      kf1: 2.0233676443413035e-10
+      kf2: 2.3619588469733264e-10
+      kf3: 1.9315962621640046e-10
+      kf4: 2.46439320780632e-10
+    quadSysId:
+      f2pA1: 0.37150302430156773
+      f2pB1: 4.507343693227396
+      f2pA2: 0.3431255133624274
+      f2pB2: 4.380541897693923
+      f2pA3: 0.43523665819504864
+      f2pB3: 4.2255128353498135
+      f2pA4: 0.5355904496723813
+      f2pB4: 2.059272533104133
+
+    # ring:
+    #   effect: 16 # 6: double spinner, 7: solid color, 16: packetRate
+    #   solidBlue: 255 # if set to solid color
+    #   solidGreen: 0 # if set to solid color
+    #   solidRed: 0 # if set to solid color
+    #   headlightEnable: 0
+    locSrv:
+      extPosStdDev: 1e-3
+      extQuatStdDev: 0.5e-1
+    # kalman:
+    #   resetEstimation: 1
+  broadcasts:
+    num_repeats: 15 # number of times broadcast commands are repeated
+    delay_between_repeats_ms: 1 # delay in milliseconds between individual repeats

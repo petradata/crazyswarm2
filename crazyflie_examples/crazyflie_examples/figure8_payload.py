@@ -13,7 +13,7 @@ def main():
     allcfs = swarm.allcfs
 
     traj1 = Trajectory()
-    traj1.loadcsv(Path(__file__).parent / 'data/figure8.csv')
+    traj1.loadcsv(Path(__file__).parent / 'data/figure8_rotated.csv')
 
     TRIALS = 1
     TIMESCALE = 0.8
@@ -30,18 +30,36 @@ def main():
         timeHelper.sleep(2.5)
 
         # enable logging
-        # allcfs.setParam('ctrlLee.indi', 3)
-        # timeHelper.sleep(5)
-        allcfs.setParam('stabilizer.controller', 7)
-        timeHelper.sleep(8)
-
+        # allcfs.setParam('ctrlLeeP.indi', 2)
+        timeHelper.sleep(5)
+     
         allcfs.setParam('usd.logging', 1)
         timeHelper.sleep(3)
+        # allcfs.setParam('ctrlLeeP.est_acc', 0)
 
-        # allcfs.startTrajectory(0, timescale=TIMESCALE)
-        # timeHelper.sleep(traj1.duration * TIMESCALE)
+        allcfs.setParam('stabilizer.controller', 7)
+        timeHelper.sleep(8)
+        # allcfs.setParam('ctrlLeeP.est_acc', 2)
+        # timeHelper.sleep(5)
 
-        timeHelper.sleep(3)
+        allcfs.setParam('ctrlLeeP.indi', 1)
+        # allcfs.setParam('ctrlLeeP.use_nn', 1)
+        timeHelper.sleep(1)
+        # allcfs.setParam('usd.logging', 0)
+
+        # exit()
+
+
+     
+        # timeHelper.sleep(8)
+
+        # allcfs.setParam('usd.logging', 1)
+        # timeHelper.sleep(3)
+
+        allcfs.startTrajectory(0, timescale=TIMESCALE)
+        timeHelper.sleep(traj1.duration * TIMESCALE)
+
+        timeHelper.sleep(5)
         # disable logging
         allcfs.setParam('usd.logging', 0)
         allcfs.setParam('stabilizer.controller', 5)
