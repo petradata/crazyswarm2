@@ -1,7 +1,13 @@
 # named list of all robots
 robots:
-  cf1:
+  cfec:
     enabled: true
+    uri: radio://0/80/2M/E7E7E7E7E7
+    initial_position: [0.0, 0.0, 0.0]
+    type: cf_big  # see robot_types
+
+  cf1:
+    enabled: false
     uri: radio://0/80/2M/E7E7E7E701
     initial_position: [0.0, 0.0, 0.0]
     type: cf21  # see robot_types
@@ -83,6 +89,17 @@ robot_types:
       marker: default_single_marker
       dynamics: default
 
+  cf_big:
+    motion_capture:
+      enabled: true
+      # only if enabled; see motion_capture.yaml
+      marker: default_single_marker
+      dynamics: default
+    big_quad: true
+    battery:
+      voltage_warning: 3.8  # V
+      voltage_critical: 3.7 # V
+
 # global settings for all robots
 all:
   # firmware logging for all drones (use robot_types/type_name to set per type, or
@@ -107,32 +124,32 @@ all:
   firmware_params:
     commander:
       enHighLevel: 1
-    ctrlLee:
-      Kpos_Px: 12.0 #2.5613 #9.0 # def: 10.0
-      Kpos_Py: 12.0 #2.4822 #9.0 # def: 10.0
-      Kpos_Pz: 12.0 #1.0091 # def: 10.0
-      Kpos_Dx: 8.0 #9.5109 #7.0  # def: 8.0
-      Kpos_Dy: 8.0 #11.2808 #7.0  # def: 8.0 
-      Kpos_Dz: 8.0 #1.0125 #  # def: 8.0  
-      Kpos_Ix: 0.0 # 0.0 #5.0
-      Kpos_Iy: 0.0 # 0.0 #5.0
-      Kpos_Iz: 0.0 # 8.0 # 0.0 #8.0
-      # 0.0265 0.0738 0.0001
-      KR_x: 0.004 #0.0265 # #0.0055   # def: 0.005  
-      KR_y: 0.004 #0.0738 # #0.0055  # def: 0.005
-      KR_z: 0.01 #0.0001 #  #0.008   # def: 0.005
-      Kw_x: 0.00095 #0.0026  #0.0013 #0.0013 # def: 0.0009
-      Kw_y: 0.00095 #0.0020  #0.0013 #0.0013  # def: 0.0009
-      Kw_z: 0.0025  # def: 0.0012
-      KI_x: 0.003 #0.012 #0.0 #0.012 #0.009 #0.015
-      KI_y: 0.003 #0.018 #0.0 #0.018 #0.009 #0.015
-      KI_z: 0.003 #0.015 #0.0 #0.015 #0.009 #0.015
-      mass: 0.0366
+    # ctrlLee:
+    #   Kpos_Px: 12.0 #2.5613 #9.0 # def: 10.0
+    #   Kpos_Py: 12.0 #2.4822 #9.0 # def: 10.0
+    #   Kpos_Pz: 12.0 #1.0091 # def: 10.0
+    #   Kpos_Dx: 8.0 #9.5109 #7.0  # def: 8.0
+    #   Kpos_Dy: 8.0 #11.2808 #7.0  # def: 8.0 
+    #   Kpos_Dz: 8.0 #1.0125 #  # def: 8.0  
+    #   Kpos_Ix: 0.0 # 0.0 #5.0
+    #   Kpos_Iy: 0.0 # 0.0 #5.0
+    #   Kpos_Iz: 0.0 # 8.0 # 0.0 #8.0
+    #   # 0.0265 0.0738 0.0001
+    #   KR_x: 0.004 #0.0265 # #0.0055   # def: 0.005  
+    #   KR_y: 0.004 #0.0738 # #0.0055  # def: 0.005
+    #   KR_z: 0.01 #0.0001 #  #0.008   # def: 0.005
+    #   Kw_x: 0.00095 #0.0026  #0.0013 #0.0013 # def: 0.0009
+    #   Kw_y: 0.00095 #0.0020  #0.0013 #0.0013  # def: 0.0009
+    #   Kw_z: 0.0025  # def: 0.0012
+    #   KI_x: 0.003 #0.012 #0.0 #0.012 #0.009 #0.015
+    #   KI_y: 0.003 #0.018 #0.0 #0.018 #0.009 #0.015
+    #   KI_z: 0.003 #0.015 #0.0 #0.015 #0.009 #0.015
+    #   mass: 0.0366
 
-      # indi: 3
-      indi: 0
+    #   # indi: 3
+    #   indi: 0
 
-      use_nn: 0
+    #   use_nn: 0
 
     ctrlLeeP:
       # P load
@@ -321,6 +338,67 @@ all:
     stabilizer:
       estimator: 2 # 1: complementary, 2: kalman
       controller: 5 # 1: PID, 2: mellinger
+
+    ctrlMel:
+      mass: 0.114 #0.146 # without camera; 0.160 with camera
+      massThrust: 20000 # 132000
+
+    ctrlLee:
+      Kpos_Px: 14.0 #2.5613 #9.0 # def: 10.0
+      Kpos_Py: 14.0 #2.4822 #9.0 # def: 10.0
+      Kpos_Pz: 40.0 #1.0091 # def: 10.0
+      Kpos_Dx: 10.0 #9.5109 #7.0  # def: 8.0
+      Kpos_Dy: 10.0 #11.2808 #7.0  # def: 8.0 
+      Kpos_Dz: 20.0 #1.0125 #  # def: 8.0  
+      Kpos_Ix: 0.0 # 0.0 #5.0
+      Kpos_Iy: 0.0 # 0.0 #5.0
+      Kpos_Iz: 4.0 # 8.0 # 0.0 #8.0
+      # 0.0265 0.0738 0.0001
+      KR_x: 0.05 #0.0265 # #0.0055   # def: 0.005  
+      KR_y: 0.05 #0.0738 # #0.0055  # def: 0.005
+      KR_z: 0.06 #0.0001 #  #0.008   # def: 0.005
+      Kw_x: 0.006 #0.0026  #0.0013 #0.0013 # def: 0.0009
+      Kw_y: 0.006 #0.0020  #0.0013 #0.0013  # def: 0.0009
+      Kw_z: 0.006  # def: 0.0012
+      KI_x: 0.01 #0.012 #0.0 #0.012 #0.009 #0.015
+      KI_y: 0.01 #0.018 #0.0 #0.018 #0.009 #0.015
+      KI_z: 0.01 #0.015 #0.0 #0.015 #0.009 #0.015
+      mass: 0.130 #0.114 #0.146
+
+
+    # working
+    # ctrlLee:
+    #   Kpos_Px: 6.0 #2.5613 #9.0 # def: 10.0
+    #   Kpos_Py: 6.0 #2.4822 #9.0 # def: 10.0
+    #   Kpos_Pz: 12.0 #1.0091 # def: 10.0
+    #   Kpos_Dx: 4.0 #9.5109 #7.0  # def: 8.0
+    #   Kpos_Dy: 4.0 #11.2808 #7.0  # def: 8.0 
+    #   Kpos_Dz: 8.0 #1.0125 #  # def: 8.0  
+    #   Kpos_Ix: 0.0 # 0.0 #5.0
+    #   Kpos_Iy: 0.0 # 0.0 #5.0
+    #   Kpos_Iz: 0.0 # 8.0 # 0.0 #8.0
+    #   # 0.0265 0.0738 0.0001
+    #   KR_x: 0.01 #0.0265 # #0.0055   # def: 0.005  
+    #   KR_y: 0.01 #0.0738 # #0.0055  # def: 0.005
+    #   KR_z: 0.02 #0.0001 #  #0.008   # def: 0.005
+    #   Kw_x: 0.0015 #0.0026  #0.0013 #0.0013 # def: 0.0009
+    #   Kw_y: 0.0015 #0.0020  #0.0013 #0.0013  # def: 0.0009
+    #   Kw_z: 0.0025  # def: 0.0012
+    #   KI_x: 0.01 #0.012 #0.0 #0.012 #0.009 #0.015
+    #   KI_y: 0.01 #0.018 #0.0 #0.018 #0.009 #0.015
+    #   KI_z: 0.01 #0.015 #0.0 #0.015 #0.009 #0.015
+    #   mass: 0.130 #0.114 #0.146
+
+    #   # indi: 3
+    #   indi: 0
+
+    #   use_nn: 0
+
+    quadSysId:
+      thrustToPwmA: 0.1469311028069
+      thrustToPwmB: 1.4529883779830977
+      thrustToPwmC: -0.1251491261582775
+
   broadcasts:
     num_repeats: 15 # number of times broadcast commands are repeated
     delay_between_repeats_ms: 1 # delay in milliseconds between individual repeats
