@@ -146,8 +146,8 @@ They can also be enabled in case you don’t want the server to connect with it.
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">robot_types</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">cf21</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">motion_capture</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">            </span><span class="c1"># only if enabled; see motion_capture.yaml</span>
+<span class="w">            </span><span class="nt">tracking</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;librigidbodytracker&quot;</span>
+<span class="w">            </span><span class="c1"># the following settings are only relevant if &quot;librigidbodytracker&quot; is used; see motion_capture.yaml</span>
 <span class="w">            </span><span class="nt">marker</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default_single_marker</span>
 <span class="w">            </span><span class="nt">dynamics</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
 <span class="w">        </span><span class="nt">big_quad</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
@@ -157,8 +157,8 @@ They can also be enabled in case you don’t want the server to connect with it.
 
 <span class="w">    </span><span class="nt">cf21_mocap_deck</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">motion_capture</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">            </span><span class="c1"># only if enabled; see motion_capture.yaml</span>
+<span class="w">            </span><span class="nt">tracking</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;librigidbodytracker&quot;</span>
+<span class="w">            </span><span class="c1"># the following settings are only relevant if &quot;librigidbodytracker&quot; is used; see motion_capture.yaml</span>
 <span class="w">            </span><span class="nt">marker</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mocap_deck</span>
 <span class="w">            </span><span class="nt">dynamics</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
 <span class="w">        </span><span class="nt">big_quad</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
@@ -209,16 +209,31 @@ This blogpost provides a good overview of the different positioning systems if y
 <span class="w">        </span><span class="nt">hostname</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;optitrackPC&quot;</span>
 </pre></div>
 </div>
-<p>‘Type’ can replaced by “optitrack”, “vicon”, “qualisys” or any of the other supported motion capture systems of the <a class="reference external" href="https://github.com/IMRCLab/motion_capture_tracking/tree/ros2/">motion capture tracking package</a>.
-‘hostname’ is the hostname of the computer running the motion capture software which can either be the PC name or the IP.</p>
-<p>Also make sure that in crazyflies.yaml, the motion_capture field is enabled for the specific robot type, or that the crazyflie is of a type that supports motion capture.</p>
+<p><cite>type</cite> can be replaced by “optitrack”, “vicon”, “qualisys” or any of the other supported motion capture systems of the <a class="reference external" href="https://github.com/IMRCLab/motion_capture_tracking/tree/ros2/">motion capture tracking package</a>.
+‘hostname’ is the hostname of the computer running the motion capture software which can either be the PC name or the IP.
+Please check the documentation of the <a class="reference external" href="https://github.com/IMRCLab/motion_capture_tracking/tree/ros2/">motion capture tracking package</a> for any additional configuration that might be needed on the vendor software side.</p>
+<p>There are two different modes for tracking rigid bodies:</p>
+<ol class="arabic simple">
+<li><p>Using the vendor-specific software (e.g., VICON Tracker or OptiTrack Motive), or</p></li>
+<li><p>Using <cite>librigidbodytracker</cite>, which is a package built into the <a class="reference external" href="https://github.com/IMRCLab/motion_capture_tracking/tree/ros2/">motion capture tracking package</a> and allows to use identical marker configurations or a single marker per rigid body as long as the initial pose is known a-priori.</p></li>
+</ol>
+<p>You can enable either mode in <cite>crazyflies.yaml</cite>:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">robot_types</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">cf21</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">motion_capture</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">cf21</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">motion_capture</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">tracking</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;librigidbodytracker&quot;</span><span class="w"> </span><span class="c1"># use &quot;vendor&quot; for vendor-specific software or &quot;librigidbodytracker&quot; for custom frame-by-frame tracking using motion capture point clouds</span>
+<span class="w">        </span><span class="nt">marker</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default_single_marker</span>
+<span class="w">        </span><span class="nt">dynamics</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
 </pre></div>
 </div>
-<p>For more indepth information about the motion capture tracking package, see the <a class="reference external" href="https://github.com/IMRCLab/motion_capture_tracking/tree/ros2/">documentation</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For most experiments, we recommend putting a single marker on top of the robots and use the “librigidbodytracker” with the “default_single_marker” configuration.
+In this mode, we use optimal task assignment at every frame, which makes this mode more robust to motion capture outliers compared to the duplicate marker arrangements.
+The main disadvantage is that the yaw angle cannot be observed without moving in the xy-plane.
+Nevertheless, it is possible to hover for 30 seconds in place for a Crazyflie 2.1, without causing flight instabilities.</p>
+</div>
+<p>For more in-depth information about the motion capture tracking package, see the <a class="reference external" href="https://github.com/IMRCLab/motion_capture_tracking/tree/ros2/">documentation</a>.</p>
 </section>
 <section id="onboard-positioning">
 <h3>Onboard positioning<a class="headerlink" href="#onboard-positioning" title="Link to this heading"></a></h3>
@@ -234,7 +249,7 @@ In this case you do not need to receive positioning from an external system like
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">robot_types</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">cf21</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">motion_capture</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">            </span><span class="nt">tracking</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;vendor&quot;</span>
 </pre></div>
 </div>
 <p>Also it is a good idea to turn on pose estimation logging such that you are able to see the poses and transforms of the Crazyflie updated in real life in rviz or the Swarm management gui.</p>
