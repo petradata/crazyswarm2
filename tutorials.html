@@ -155,7 +155,7 @@ The crazyflie names should appear with their estimated position.</p>
 <section id="mapping-with-simple-mapper">
 <h2>Mapping with simple mapper<a class="headerlink" href="#mapping-with-simple-mapper" title="Link to this heading"></a></h2>
 <p>If you have a crazyflie with a multiranger and flowdeck, you can try out some simple mapping.</p>
-<p>Make sure that the scan and odometry logging is enabled in crazyflies.yaml:</p>
+<p>Make sure that the scan and odometry logging is enabled and the reference frame is set to odom in crazyflies.yaml:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>firmware_logging:
 <span class="w">  </span>enabled:<span class="w"> </span><span class="nb">true</span>
 <span class="w">  </span>default_topics:
@@ -170,6 +170,10 @@ The crazyflie names should appear with their estimated position.</p>
 <span class="w">  </span>stabilizer:
 <span class="w">    </span>estimator:<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="c1"># 1: complementary, 2: kalman</span>
 <span class="w">    </span>controller:<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="c1"># 1: PID, 2: mellinger</span>
+</pre></div>
+</div>
+<p>Finally make sure that the reference frame is set to ‘cf231/odom’</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>reference_frame:<span class="w"> </span>cf231/odom
 </pre></div>
 </div>
 <p>If you are using a different name for your crazyflie, make sure to change the following in the example launch file (multiranger_simple_mapper_launch.py):</p>
@@ -203,7 +207,7 @@ With a <a class="reference external" href="https://www.bitcraze.io/products/flow
 <span class="w">  </span>uri:<span class="w"> </span>radio://0/20/2M/E7E7E7E701
 </pre></div>
 </div>
-<p>And enable the following default topic logging:</p>
+<p>And enable the following default topic logging and the reference frames:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>firmware_logging:
 <span class="w">  </span>enabled:<span class="w"> </span><span class="nb">true</span>
 <span class="w">  </span>default_topics:
@@ -218,6 +222,10 @@ With a <a class="reference external" href="https://www.bitcraze.io/products/flow
 <span class="w">  </span>stabilizer:
 <span class="w">    </span>estimator:<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="c1"># 1: complementary, 2: kalman</span>
 <span class="w">    </span>controller:<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="c1"># 1: PID, 2: mellinger</span>
+</pre></div>
+</div>
+<p>Finally make sure that the reference frame is set to ‘cf231/odom’</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>reference_frame:<span class="w"> </span>cf231/odom
 </pre></div>
 </div>
 </section>
@@ -331,7 +339,7 @@ ros2<span class="w"> </span>run<span class="w"> </span>teleop_twist_keyboard<spa
 <h3>Preperation<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This tutorial assume you have taken the above mapping tutorial first.</p>
+<p>This tutorial assume you have done the above mapping tutorial first, along with the yaml file changes</p>
 </div>
 <p>Find the all the files that were created by the RVIZ2 slam toolbox plugin, which should be in format *.yaml, *.posegraph, *.data and *.pgm, and copy them in the /crazyflie_examples/data/ folder.
 Either you can replace those that are there already (‘map.*’), or call them different and just change the name in the launch file, which will be explain now.</p>
@@ -398,7 +406,7 @@ Either you can replace those that are there already (‘map.*’), or call them 
 </div>
 <p>The crazyflie_server, vel_mux and slam toolbox nodes are obviously the same as the mapping launch file example, with some key differences:</p>
 <ul class="simple">
-<li><p>crazyflie_server: An extra parameter called ‘world_tf_name’ which changes the name of the ‘world’ transform to ‘map’. This is to ensure compatibilty with the NAV2 bringup node later.</p></li>
+<li><p>crazyflie_server: The reference frame is set to ‘map’. This is to ensure compatibilty with the NAV2 bringup node later.</p></li>
 <li><p>slam toolbox:  ‘map_frame’ set to ‘map, ‘mode’ set to localization with a ‘map_file_name’ and ‘map_start_pose’ (now remember marking the start position of the mapping tutorial?)</p></li>
 </ul>
 <p>The next two nodes are new, which are included IncludeLaunchDescription to include other launch files (since these are pretty big).</p>
