@@ -10,7 +10,7 @@ def main():
     Pos1 = np.array([0.0, -0.2, 0.0])
     Pos2 = np.array([0.0, 0.2, 0.0])
     Height1 = 0.4
-    Height2 = 0.5
+    Height2 = 0.7
     swapTime = 3
 
     swarm = Crazyswarm()

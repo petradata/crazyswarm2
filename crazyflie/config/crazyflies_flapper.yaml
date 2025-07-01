@@ -2,53 +2,38 @@
 fileversion: 3
 
 robots:
-  cf4:
+  cf231:
     enabled: true
-    uri: radio://0/80/2M/E7E7E7EE06
-    initial_position: [0.5, 0.1, 0.0]
-    type: cf21
+    uri: radio://0/80/2M/E7E7E7E7E7
+    initial_position: [0.0, 0.5, 0.0]
+    type: cf21  # see robot_types
+    # firmware_params:
+    #   kalman:
+    #     pNAcc_xy: 1.0 # default 0.5
+    # firmware_logging:
+    #   enabled: true
+    #   custom_topics:
+    #     topic_name3: 
+    #       frequency: 1
+    #       vars: ["acc.x", "acc.y"]
+    # reference_frame: "odom_cf231" # use a custom reference frame if no global coordinate system is available
 
   cf5:
-    enabled: true
-    uri: radio://0/80/2M/E7E7E7E70F
-    initial_position: [-0.2, 0.5, 0.0]
-    type: cf21
-
-  cf6:
-    enabled: true
-    uri: radio://0/80/2M/E7E7E7E716
-    initial_position: [-0.5, -0.1, 0.0]
-    type: cf21
-
-  cf7:
-    enabled: true
-    uri: radio://0/80/2M/E7E7E7E717
-    initial_position: [0.2, -0.5, 0.0]
-    type: cf21
-
-  cf13:
     enabled: false
-    uri: radio://0/80/2M/E7E7E7EE03
-    initial_position: [0.0, 0.5, 0.0]
-    type: cf21
+    uri: radio://0/80/2M/E7E7E7E702
+    initial_position: [0.0, 0.0, 0.0]
+    type: cf21  # see robot_types
 
-  cf15:
-    enabled: false
-    uri: radio://0/80/2M/E7E7E7EE05
-    initial_position: [0.0, -0.2, 0.0]
-    type: cf21
-
-  cf16:
-    enabled: false
-    uri: radio://0/80/2M/E7E7E7EE06
-    initial_position: [0.0, -0.5, 0.0]
-    type: cf21
-
-  cf17:
-    enabled: false
-    uri: radio://0/80/2M/E7E7E7EE07
-    initial_position: [0.0, 0.2, 0.0]
-    type: cf21
+    # firmware_params:
+    #   kalman:
+    #     pNAcc_xy: 1.0 # default 0.5
+    # firmware_logging:
+    #   enabled: true
+    #   custom_topics:
+    #     topic_name3: 
+    #       frequency: 1
+    #       vars: ["acc.x", "acc.y"]
+    # reference_frame: "odom_cf231" # use a custom reference frame if no global coordinate system is available
 
   # polulu10:
   #   enabled: false
